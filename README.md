@@ -17,7 +17,7 @@ This container features a full stack of CQPweb and its surroundings, including
 This container is trying to stick to the _best practices_ mentioned in the official CQPweb documentation for the [upcoming version 3.3.0+](http://cwb.sourceforge.net/files/CQPwebAdminManual.pdf) already. However, the currently used version in this image and Dockerfile might differ. At the moment, the used versions are:
 
 * **Ubuntu LTS:**: 20.04 
-* **CQPWeb**: v3.2.43
+* **CQPWeb**: v3.3.17
 * **CWB**: v3.5.0
 * **CQP Perl API**: 
   * Perl-CWB: v3.0.3

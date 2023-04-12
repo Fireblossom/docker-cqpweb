@@ -7,7 +7,7 @@
 # Extract source files
 cd /tmp/
 tar -xzf cwb.tar.gz
-tar -xzf cqpweb.tar.gz
+#tar -xzf cqpweb.tar.gz
 
 # Move CQPweb files to Apache's web root and adjust permissions
 mv /tmp/CQPweb*/* /var/www/html
