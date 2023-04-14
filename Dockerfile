@@ -34,7 +34,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # setup JupyterHub
 RUN npm install -g configurable-http-proxy
-RUN python3 -m pip install jupyterhub cwb-ccc
+RUN python3 -m pip install jupyterhub
 COPY jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
 
 # change back to interactive
@@ -50,6 +50,8 @@ RUN svn --non-interactive --trust-server-cert checkout https://svn.code.sf.net/p
 COPY setup-scripts/run_cqp /docker-scripts/.
 COPY setup-scripts/cqp_installation /docker-scripts/.
 COPY setup-scripts/check_ssl_expiration /docker-scripts/.
+
+RUN python3 -m pip install cwb-ccc
 
 WORKDIR /docker-scripts
 RUN bash ./cqp_installation
