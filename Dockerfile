@@ -51,9 +51,9 @@ COPY setup-scripts/run_cqp /docker-scripts/.
 COPY setup-scripts/cqp_installation /docker-scripts/.
 COPY setup-scripts/check_ssl_expiration /docker-scripts/.
 
-RUN python3 -m pip install cwb-ccc
-
 WORKDIR /docker-scripts
 RUN bash ./cqp_installation
+
+RUN python3 -m pip install cwb-ccc
 ENTRYPOINT ["/usr/bin/supervisord"]
 #ENTRYPOINT ["bash", "./run_cqp"]
