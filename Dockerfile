@@ -11,6 +11,7 @@ WORKDIR /tmp
 # Open ports 80 and 22 for apache and ssh respectively
 EXPOSE 80/tcp
 EXPOSE 443/tcp
+EXPOSE 8000
 
 # Disable MySQL binary logging as it needs tremendous amounts of disk space
 ENV log_bin OFF
@@ -23,10 +24,18 @@ ENV DEBIAN_FRONTEND noninteractive
 # Installation and setup of everything required by cwb/cqp
 #########################################################
 
-RUN apt-get update; apt-get install -y gawk tar gzip wget subversion net-tools  apache2 perl \
+RUN apt-get update; apt-get install -y gawk tar gzip wget subversion net-tools apache2 perl \
 libglib2.0-dev libpcre3 libreadline8 libtinfo6 vim php \
-php-mysqli php-mbstring php-gd mysql-server r-base zlib1g-dev \
-certbot; mkdir /docker-scripts
+php-mysqli php-mbstring php-gd mysql-server r-base zlib1g-dev supervisor \
+certbot python3-dev python3-pip python3-pycurl python3-venv nodejs npm 
+RUN mkdir /docker-scripts
+RUN mkdir -p /var/log/supervisor
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# setup JupyterHub
+RUN npm install -g configurable-http-proxy
+RUN python3 -m pip install jupyterhub cwb-ccc
+COPY jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
 
 # change back to interactive
 ENV DEBIAN_FRONTEND dialog
@@ -44,4 +53,5 @@ COPY setup-scripts/check_ssl_expiration /docker-scripts/.
 
 WORKDIR /docker-scripts
 RUN bash ./cqp_installation
-ENTRYPOINT ["bash", "./run_cqp"]
+ENTRYPOINT ["/usr/bin/supervisord"]
+#ENTRYPOINT ["bash", "./run_cqp"]

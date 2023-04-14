@@ -206,6 +206,8 @@ fi
 if ! [[ -f /var/run/mysqld/mysqld.sock ]]; then
 echo "No running MySQL instance found, starting MySQL..."
 service mysql start
+mysql -uroot -proot -e "SET GLOBAL local_infile = true;"
+mysql -uroot -proot -e "show variables like 'local_infile';"
 fi
 
 service apache2 start
