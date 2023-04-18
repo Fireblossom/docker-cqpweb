@@ -1309,7 +1309,7 @@ c.JupyterHub.data_files_path = '/usr/local/share/jupyterhub'
 #  
 #  Defaults to an empty set, in which case no user has admin access.
 #  Default: set()
-# c.Authenticator.admin_users = set()
+c.Authenticator.admin_users = set(['admin'])
 
 ## Set of usernames that are allowed to log in.
 #  

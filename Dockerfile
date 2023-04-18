@@ -27,15 +27,22 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update; apt-get install -y gawk tar gzip wget subversion net-tools apache2 perl \
 libglib2.0-dev libpcre3 libreadline8 libtinfo6 vim php \
 php-mysqli php-mbstring php-gd mysql-server r-base zlib1g-dev supervisor \
-certbot python3-dev python3-pip python3-pycurl python3-venv nodejs npm 
+certbot python3-dev python3-pip python3-pycurl python3-venv nodejs npm git
 RUN mkdir /docker-scripts
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+RUN git clone https://github.com/ausgerechnet/cwb-ccc.git
+WORKDIR /tmp/cwb-ccc
+RUN pip3 install -r requirements.txt
+RUN python3 setup.py bdist_wheel
 
 # setup JupyterHub
 RUN npm install -g configurable-http-proxy
 RUN python3 -m pip install jupyterhub
 COPY jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
+RUN useradd -rm -d /home/${CQPWEB_USER:-admin} -s /bin/bash -g root \
+-G sudo -u 1001 ${CQPWEB_USER:-admin} -p ${CQPWEB_USER_PASSWORD:-cqpwebsecurepassword}
 
 # change back to interactive
 ENV DEBIAN_FRONTEND dialog
