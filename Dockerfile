@@ -32,11 +32,6 @@ RUN mkdir /docker-scripts
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-RUN git clone https://github.com/ausgerechnet/cwb-ccc.git
-WORKDIR /tmp/cwb-ccc
-RUN pip3 install -r requirements.txt
-RUN python3 setup.py bdist_wheel
-
 # setup JupyterHub
 RUN npm install -g configurable-http-proxy
 RUN python3 -m pip install jupyterhub
@@ -62,5 +57,10 @@ WORKDIR /docker-scripts
 RUN bash ./cqp_installation
 
 RUN python3 -m pip install cwb-ccc
+RUN git clone https://github.com/ausgerechnet/cwb-ccc.git /tmp/cwb-ccc
+WORKDIR /tmp/cwb-ccc
+RUN pip3 install -r requirements.txt
+RUN python3 setup.py bdist_wheel
+
 ENTRYPOINT ["/usr/bin/supervisord"]
 #ENTRYPOINT ["bash", "./run_cqp"]
