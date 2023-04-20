@@ -34,7 +34,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # setup JupyterHub
 RUN npm install -g configurable-http-proxy
-RUN python3 -m pip install jupyterhub jupyterlab jupyterhub-nativeauthenticator
+RUN python3 -m pip install jupyterhub jupyterlab jupyterhub-nativeauthenticator supervisor-stdout
 COPY jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
 
 # change back to interactive
