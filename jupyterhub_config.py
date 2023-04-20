@@ -175,7 +175,9 @@ c.JupyterHub.allow_named_servers = True
 #    - null: jupyterhub.auth.NullAuthenticator
 #    - pam: jupyterhub.auth.PAMAuthenticator
 #  Default: 'jupyterhub.auth.PAMAuthenticator'
-# c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
+c.JupyterHub.authenticator_class = 'nativeauthenticator.NativeAuthenticator'
+import os, nativeauthenticator
+c.JupyterHub.template_paths = [f"{os.path.dirname(nativeauthenticator.__file__)}/templates/"]
 
 ## The base URL of the entire application.
 #  
@@ -769,8 +771,14 @@ c.JupyterHub.data_files_path = '/usr/local/share/jupyterhub'
 #    - localprocess: jupyterhub.spawner.LocalProcessSpawner
 #    - simple: jupyterhub.spawner.SimpleLocalProcessSpawner
 #  Default: 'jupyterhub.spawner.LocalProcessSpawner'
-# c.JupyterHub.spawner_class = 'jupyterhub.spawner.LocalProcessSpawner'
+c.JupyterHub.spawner_class = 'jupyterhub.spawner.LocalProcessSpawner'
+from subprocess import check_call
+def create_system_user(spawner):
+    """Hook to create system user before spawning notebook. Required since NativeAuthenticator does not create users."""
+    username = spawner.user.name
+    check_call(['useradd', username, "-m"])
 
+c.Spawner.pre_spawn_hook = create_system_user
 ## Path to SSL certificate file for the public facing interface of the proxy
 #  
 #          When setting this, you should also set ssl_key

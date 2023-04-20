@@ -25,7 +25,7 @@ ENV DEBIAN_FRONTEND noninteractive
 #########################################################
 
 RUN apt-get update; apt-get install -y gawk tar gzip wget subversion net-tools apache2 perl \
-libglib2.0-dev libpcre3 libreadline8 libtinfo6 vim php \
+libglib2.0-dev libpcre3 libreadline8 libtinfo6 vim php sudo \
 php-mysqli php-mbstring php-gd mysql-server r-base zlib1g-dev supervisor \
 certbot python3-dev python3-pip python3-pycurl python3-venv nodejs npm git
 RUN mkdir /docker-scripts
@@ -34,10 +34,8 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # setup JupyterHub
 RUN npm install -g configurable-http-proxy
-RUN python3 -m pip install jupyterhub
+RUN python3 -m pip install jupyterhub jupyterlab jupyterhub-nativeauthenticator
 COPY jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
-RUN useradd -rm -d /home/${CQPWEB_USER:-admin} -s /bin/bash -g root \
--G sudo -u 1001 ${CQPWEB_USER:-admin} -p ${CQPWEB_USER_PASSWORD:-cqpwebsecurepassword}
 
 # change back to interactive
 ENV DEBIAN_FRONTEND dialog
@@ -50,6 +48,7 @@ RUN svn --non-interactive --trust-server-cert checkout https://svn.code.sf.net/p
 
 # Copy all necessary setup scripts and the CQP source code into the image
 COPY setup-scripts/run_cqp /docker-scripts/.
+COPY setup-scripts/run_jh /docker-scripts/.
 COPY setup-scripts/cqp_installation /docker-scripts/.
 COPY setup-scripts/check_ssl_expiration /docker-scripts/.
 
