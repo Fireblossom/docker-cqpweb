@@ -13,4 +13,4 @@ fi
 jupyter labextension disable @jupyterlab/docmanager-extension:download
 jupyter labextension disable @jupyterlab/filebrowser-extension:download
 
-jupyterhub -f /etc/jupyterhub/jupyterhub_config.py
+#jupyterhub -f /etc/jupyterhub/jupyterhub_config.py

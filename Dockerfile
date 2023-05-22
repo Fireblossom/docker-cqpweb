@@ -28,13 +28,13 @@ RUN apt-get update; apt-get install -y gawk tar gzip wget subversion net-tools a
 libglib2.0-dev libpcre3 libreadline8 libtinfo6 vim php sudo \
 php-mysqli php-mbstring php-gd mysql-server r-base zlib1g-dev supervisor \
 certbot python3-dev python3-pip python3-pycurl python3-venv nodejs npm git
-RUN mkdir /docker-scripts
+RUN mkdir -p /docker-scripts
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # setup JupyterHub
 RUN npm install -g configurable-http-proxy
-RUN python3 -m pip install jupyterhub jupyterlab jupyterhub-nativeauthenticator supervisor-stdout
+RUN python3 -m pip install jupyterhub jupyterlab jupyterhub-nativeauthenticator
 COPY jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
 
 # change back to interactive
@@ -62,5 +62,10 @@ RUN pip3 install -r requirements.txt
 RUN python3 setup.py bdist_wheel
 
 WORKDIR /docker-scripts
-ENTRYPOINT ["/usr/bin/supervisord"]
+RUN apt remove -y python3-pip
+RUN wget https://bootstrap.pypa.io/get-pip.py
+RUN python3 get-pip.py
+RUN pip install pyopenssl --upgrade
+RUN pip install 'supervisor-stdout @ git+https://github.com/coderanger/supervisor-stdout'
+ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 #ENTRYPOINT ["bash", "./run_cqp"]
