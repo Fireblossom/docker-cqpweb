@@ -66,6 +66,7 @@ COPY setup-scripts/run_cqp /docker-scripts/.
 COPY setup-scripts/cqp_installation /docker-scripts/.
 COPY setup-scripts/check_ssl_expiration /docker-scripts/.
 COPY setup-scripts/bootstrap.py /docker-scripts/.
+COPY setup-scripts/first_setup.sh /docker-scripts/.
 
 WORKDIR /docker-scripts
 RUN bash ./cqp_installation
