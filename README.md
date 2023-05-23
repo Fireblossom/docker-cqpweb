@@ -1,3 +1,11 @@
+podman run \
+  --privileged \
+  --detach \
+  --name=tljh-dev \
+  --publish 12000:8080 \
+  --mount type=bind,source=$(pwd),target=/srv/src \
+  cqp-systemd
+
 # Docker-CQPweb
 
 This repository contains the necessary Dockerfile, source code and Scripts to build an all-in-one image for the usage of [CQPweb](http://cwb.sourceforge.net/cqpweb.php). If you want to compile different versions of CQPweb's source code, [get them here](http://cwb.sourceforge.net/download.php).

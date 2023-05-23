@@ -4,7 +4,8 @@ FROM ubuntu:20.04
 #########################################################
 # General docker image settings
 #########################################################
-
+ENV TZ=Europe/Berlin
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Dump everything to /tmp during image creation
 WORKDIR /tmp
 
@@ -12,6 +13,7 @@ WORKDIR /tmp
 EXPOSE 80/tcp
 EXPOSE 443/tcp
 EXPOSE 8000
+EXPOSE 12000
 
 # Disable MySQL binary logging as it needs tremendous amounts of disk space
 ENV log_bin OFF
@@ -19,23 +21,35 @@ ENV log_bin OFF
 # Change to silent mode for installing the required packages without providing user input
 ENV DEBIAN_FRONTEND noninteractive
 
-
 #########################################################
 # Installation and setup of everything required by cwb/cqp
 #########################################################
 
 RUN apt-get update; apt-get install -y gawk tar gzip wget subversion net-tools apache2 perl \
-libglib2.0-dev libpcre3 libreadline8 libtinfo6 vim php sudo \
+libglib2.0-dev libpcre3 libreadline8 libtinfo6 vim php sudo systemd curl init \
 php-mysqli php-mbstring php-gd mysql-server r-base zlib1g-dev supervisor \
 certbot python3-dev python3-pip python3-pycurl python3-venv nodejs npm git
+
+# Kill all the things we don't need
+RUN find /etc/systemd/system \
+    /lib/systemd/system \
+    -path '*.wants/*' \
+    -not -name '*journald*' \
+    -not -name '*systemd-tmpfiles*' \
+    -not -name '*systemd-user-sessions*' \
+    -exec rm \{} \;
+RUN mkdir -p /etc/sudoers.d
+
+RUN systemctl set-default multi-user.target
+
 RUN mkdir -p /docker-scripts
 RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # setup JupyterHub
-RUN npm install -g configurable-http-proxy
-RUN python3 -m pip install jupyterhub jupyterlab jupyterhub-nativeauthenticator
-COPY jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
+##RUN npm install -g configurable-http-proxy
+#RUN python3 -m pip install jupyterhub jupyterlab jupyterhub-nativeauthenticator
+#COPY jupyterhub_config.py /etc/jupyterhub/jupyterhub_config.py
 
 # change back to interactive
 ENV DEBIAN_FRONTEND dialog
@@ -48,24 +62,26 @@ RUN svn --non-interactive --trust-server-cert checkout https://svn.code.sf.net/p
 
 # Copy all necessary setup scripts and the CQP source code into the image
 COPY setup-scripts/run_cqp /docker-scripts/.
-COPY setup-scripts/run_jh /docker-scripts/.
+#COPY setup-scripts/run_jh /docker-scripts/.
 COPY setup-scripts/cqp_installation /docker-scripts/.
 COPY setup-scripts/check_ssl_expiration /docker-scripts/.
+COPY setup-scripts/bootstrap.py /docker-scripts/.
 
 WORKDIR /docker-scripts
 RUN bash ./cqp_installation
 
-RUN python3 -m pip install cwb-ccc
-RUN git clone https://github.com/ausgerechnet/cwb-ccc.git /tmp/cwb-ccc
-WORKDIR /tmp/cwb-ccc
-RUN pip3 install -r requirements.txt
-RUN python3 setup.py bdist_wheel
+#RUN python3 -m pip install cwb-ccc
+#RUN git clone https://github.com/ausgerechnet/cwb-ccc.git /tmp/cwb-ccc
+#WORKDIR /tmp/cwb-ccc
+#RUN pip3 install -r requirements.txt
+#RUN python3 setup.py bdist_wheel
 
-WORKDIR /docker-scripts
-RUN apt remove -y python3-pip
-RUN wget https://bootstrap.pypa.io/get-pip.py
-RUN python3 get-pip.py
+#WORKDIR /docker-scripts
+#RUN apt remove -y python3-pip
+#RUN wget https://bootstrap.pypa.io/get-pip.py
+#RUN python3 get-pip.py
 RUN pip install pyopenssl --upgrade
 RUN pip install 'supervisor-stdout @ git+https://github.com/coderanger/supervisor-stdout'
-ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+#ENTRYPOINT ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
 #ENTRYPOINT ["bash", "./run_cqp"]
+CMD ["/bin/bash", "-c", "exec /sbin/init --log-target=journal 3>&1"]
